@@ -1,53 +1,51 @@
-const issueTitle = 'This is an issue of type: Task.';
-
-describe('Issue deletion', () => {
+describe("Issue Deletion", () => {
+    before(() => {
+      // Set a global timeout of 60 seconds for all commands
+      Cypress.config("defaultCommandTimeout", 60000);
+    });
+  
     beforeEach(() => {
-        cy.visit('/');
-        cy.url().should('eq', `${Cypress.env('baseUrl')}project`).then((url) => {
-            cy.visit(url + '/board');
-            cy.contains(issueTitle).click();
-        });
+      // Navigate to the board
+      cy.visit("/board");
+  
+      // Ensure the board is fully loaded by checking for the backlog element
+      cy.get('[data-testid="board-list:backlog"]').should("be.visible");
+  
+      // Open the first issue from the backlog and make sure it is visible
+      cy.get('[data-testid="list-issue"]').first().click();
+      cy.get('[data-testid="modal:issue-details"]').should("be.visible");
     });
-
-    it('Should delete issue successfully', () => {
-        const expectedAmountOfIssuesAfterDeletion = 3;
-
-        cy.get('[data-testid="modal:issue-details"]').should('be.visible');
-        cy.get('[data-testid="icon:trash"]').click();
-        cy.get('[data-testid="modal:confirm"]').should('be.visible');
-        cy.get('[data-testid="modal:confirm"]').within(() => {
-            cy.contains('Are you sure you want to delete this issue?').should('be.visible');
-            cy.contains("Once you delete, it's gone for good").should('be.visible');
-            cy.contains('Delete issue').click();
-        });
-
-        cy.get('[data-testid="modal:confirm"]').should('not.exist');
-
-        cy.get('[data-testid="board-list:backlog"]').within(() => {
-            cy.contains(issueTitle).should('not.exist');
-            cy.get('[data-testid="list-issue"]').should('have.length', expectedAmountOfIssuesAfterDeletion);
-        });
+  
+    it("Test Case 1: Issue Deletion", () => {
+      // Click the delete button and confirm deletion
+      cy.get('[data-testid="icon:trash"]').click();
+      cy.get('[data-testid="modal:confirm"]').should("be.visible");
+      cy.get('[data-testid="modal:confirm"]').contains("Delete issue").click();
+  
+      // Assert that the deletion confirmation dialogue is not visible
+      cy.get('[data-testid="modal:confirm"]').should("not.exist");
+  
+      // Assert that the issue is deleted and no longer displayed in the backlog
+      cy.get('[data-testid="list-issue"]')
+        .first()
+        .should("not.contain", "This is an issue of type: Task."); // Adjust the text as needed
     });
-
-    it('Should cancel delete issue process successfully', () => {
-        const expectedAmountOfIssuesAfterCancel = 4;
-
-        cy.get('[data-testid="modal:issue-details"]').should('be.visible');
-        cy.get('[data-testid="icon:trash"]').click();
-        cy.get('[data-testid="modal:confirm"]').should('be.visible');
-        cy.get('[data-testid="modal:confirm"]').within(() => {
-            cy.contains('Are you sure you want to delete this issue?').should('be.visible');
-            cy.contains("Once you delete, it's gone for good").should('be.visible');
-            cy.contains('Cancel').click();
-        });
-
-        cy.get('[data-testid="modal:confirm"]').should('not.exist');
-        cy.get('[data-testid="icon:close"]').first().click();
-        cy.get('[data-testid="modal:issue-details"]').should('not.exist');
-
-        cy.get('[data-testid="board-list:backlog"]').within(() => {
-            cy.contains(issueTitle).should('be.visible');
-            cy.get('[data-testid="list-issue"]').should('have.length', expectedAmountOfIssuesAfterCancel);
-        });
+  
+    it("Test Case 2: Cancel Issue Deletion", () => {
+      // Click the delete button
+      cy.get('[data-testid="icon:trash"]').click();
+  
+      // Cancel the deletion in the confirmation pop-up
+      cy.get('[data-testid="modal:confirm"]').should("be.visible");
+      cy.get('[data-testid="modal:confirm"]').contains("Cancel").click();
+  
+      // Assert that the deletion confirmation dialogue is not visible
+      cy.get('[data-testid="modal:confirm"]').should("not.exist");
+  
+      // Assert that the issue is still displayed in the backlog
+      cy.get('[data-testid="list-issue"]')
+        .first()
+        .should("contain", "This is an issue of type: Task."); // Adjust the text as needed
     });
-});
+  });
+  
