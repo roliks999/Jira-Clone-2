@@ -1,3 +1,4 @@
+
 describe('Issue create', () => {
   beforeEach(() => {
     cy.visit('/');
@@ -86,4 +87,74 @@ describe('Issue create', () => {
       cy.get('[data-testid="form-field:title"]').should('contain', 'This field is required');
     });
   });
+  it('Create an Other issue and validate it successfully with CUSTOM DATA', () => {
+    // System finds modal for creating issue and does next steps inside of it
+    cy.get('[data-testid="modal:issue-create"]').within(() => {
+      // Type value to description input field
+      cy.get('.ql-editor').type('My bug description');
+      cy.get('.ql-editor').should('have.text', 'My bug description');
+
+      // Type value to title input field
+      // Order of filling in the fields is first description, then title on purpose
+      // Otherwise filling title first sometimes doesn't work due to web page implementation
+      cy.get('input[name="title"]').type('BUG');
+      cy.get('input[name="title"]').should('have.value', 'BUG');
+
+      // Open issue type dropdown and choose Bug
+      cy.get('[data-testid="select:type"]').click();
+      cy.get('[data-testid="select-option:Bug"]').wait(1000).trigger('Bug').trigger('click');
+      cy.get('[data-testid="icon:bug"]').should('be.visible');
+
+      // Select Pickle Rick from reporter dropdown
+      cy.get('[data-testid="select:reporterId"]').click();
+      cy.get('[data-testid="select-option:Pickle Rick"]').click();
+
+      // Select Lord Gaben from assignee dropdown
+      cy.get('[data-testid="form-field:userIds"]').click();
+      cy.get('[data-testid="select-option:Lord Gaben"]').click();
+
+       // Select Highest from Priority dropdown
+       cy.get('[data-testid="select:priority"]').click();
+       cy.get('[data-testid="select-option:Highest"]').click();
+
+      // Click on button "Create issue"
+      cy.get('button[type="submit"]').click();
+    });  
+  });
+  it('Create an Other issue and validate it successfully with RANDOM DATA', () => {
+    const { faker } = require('@faker-js/faker')
+      const randomTitle = faker.random.word();
+      const randomDescription = faker.lorem.words(5);
+    // System finds modal for creating issue and does next steps inside of it
+    cy.get('[data-testid="modal:issue-create"]').within(() => {
+      // Type value to description input field
+      cy.get('.ql-editor').type(randomDescription);
+      cy.get('.ql-editor').should('have.text', randomDescription);
+
+      // Type value to title input field
+      // Order of filling in the fields is first description, then title on purpose
+      // Otherwise filling title first sometimes doesn't work due to web page implementation
+      cy.get('input[name="title"]').type(randomTitle);
+      cy.get('input[name="title"]').should('have.value',randomTitle);
+
+      // Open issue type dropdown and choose Bug
+      cy.get('[data-testid="select:type"]').click();
+      cy.get('[data-testid="select-option:Bug"]').wait(1000).trigger('Bug').trigger('click');
+      cy.get('[data-testid="icon:bug"]').should('be.visible');
+
+      // Select Lord Gaben from assignee dropdown
+      cy.get('[data-testid="form-field:userIds"]').click();
+      cy.get('[data-testid="select-option:Lord Gaben"]').click();
+ 
+
+       // Select Highest from Priority dropdown
+       cy.get('[data-testid="select:priority"]').click();
+       cy.get('[data-testid="select-option:Highest"]').click();
+
+      // Click on button "Create issue"
+      cy.get('button[type="submit"]').click();
+    });
+
+  })
+  ;
 });
